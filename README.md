@@ -31,3 +31,26 @@ Everything starts as an **Unsaved Draft**. It reconciles up the tiers from there
 ---
 
 <sub>Licensed under Apache-2.0. The SNCF does not recommend running production on a spreadsheet. If you do, please film it.</sub>
+
+
+## It actually works
+
+Brainfuck can't speak HTTP — but it can **emit a manifest**, which is a perfectly good client
+when you pipe it into `skctl`. This repo ships a generator, a tiny interpreter, and a ready
+program that prints a Deployment manifest.
+
+```bash
+# print the manifest the Brainfuck way, then apply it
+python3 bf.py apply.bf | skctl apply /dev/stdin
+
+# generate a Brainfuck program for any manifest string
+python3 bfgen.py '{"deployments":[{"name":"web","image":"nginx","replicas":2}]}' > web.bf
+python3 bf.py web.bf | skctl apply /dev/stdin
+```
+
+- `bf.py` — a minimal Brainfuck interpreter.
+- `bfgen.py` — generates a Brainfuck program that prints any string.
+- `apply.bf` — a generated program that prints a Deployment manifest.
+
+If it reconciles from here, it reconciles anywhere.
+
