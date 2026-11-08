@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Compile check
+        run: python -m py_compile bf.py bfgen.py
+      - name: apply.bf emits a valid manifest
+        run: |
+          python bf.py apply.bf | tee /tmp/manifest.json
+          jq -e '.deployments | length > 0' /tmp/manifest.json
+      - name: Generator round-trips through the interpreter
+        run: test "$(python bfgen.py 'it reconciles' | python bf.py)" = "it reconciles"
